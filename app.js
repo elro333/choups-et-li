@@ -269,10 +269,21 @@ $("#btn-reglages").addEventListener("click", () => {
 const barreHaut = $("#barre-haut");
 window.addEventListener("scroll", () => barreHaut.classList.toggle("defile", window.scrollY > 40), { passive: true });
 
-// Pas de zoom à deux doigts (Safari ignore parfois l'interdiction du HTML)
+// Pas de zoom, comme une vraie appli. L'iPhone ignore souvent l'interdiction
+// écrite dans le HTML, alors on bloque les gestes nous-mêmes :
+// 1. le pincement à deux doigts (événements « gesture » de Safari) ;
 ["gesturestart", "gesturechange", "gestureend"].forEach((ev) =>
   document.addEventListener(ev, (e) => e.preventDefault(), { passive: false })
 );
+// 2. tout mouvement avec plus d'un doigt ;
+document.addEventListener("touchmove", (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+// 3. le double-tap qui zoome (sauf sur les boutons et les champs, pour pouvoir taper vite).
+let dernierTap = 0;
+document.addEventListener("touchend", (e) => {
+  const maintenant = Date.now();
+  if (maintenant - dernierTap < 350 && !e.target.closest("button, input, textarea, select, label, a")) e.preventDefault();
+  dernierTap = maintenant;
+}, { passive: false });
 
 // Quand les données changent, on redessine l'écran
 Donnees.surChangement(afficher);
@@ -280,9 +291,35 @@ Donnees.surChangement(afficher);
 // Tous les fichiers d'onglets sont chargés : on démarre sur « Nous »
 window.addEventListener("DOMContentLoaded", () => {
   boutonsOnglets[0].classList.add("active");
+  // Qui tient ce téléphone ?
+  // - le lien « …/choups-et-li/?moi=li » le dit directement ;
+  // - sinon, au tout premier lancement, l'appli pose la question une fois.
+  // (Avec Supabase, ce sera le compte connecté qui le dira.)
+  const demande = new URLSearchParams(location.search).get("moi");
+  if (Donnees.personnes().includes(demande)) {
+    Donnees.changerMoi(demande);
+    history.replaceState(null, "", location.pathname); // on retire « ?moi=… » de l'adresse
+  }
   afficher();
   requestAnimationFrame(placerPilule);
+  if (!Donnees.moiChoisi()) setTimeout(demanderQui, 400);
 });
+
+function demanderQui() {
+  ouvrirFeuille({
+    titre: "Bienvenue 💕",
+    html: `
+      <p style="text-align:center;font-size:44px;margin:0">💗</p>
+      <p class="grand" style="text-align:center;margin:0">C'est qui sur ce téléphone ?</p>
+      ${Donnees.personnes().map((p) => `<button type="button" class="btn-principal" data-je-suis="${p}">Je suis ${surnom(p)}</button>`).join("")}
+      <p class="aide" style="text-align:center;margin:0">On ne le demande qu'une fois. Ça se change dans … › Réglages.</p>`,
+  });
+  formFeuille.querySelectorAll("[data-je-suis]").forEach((b) => b.addEventListener("click", () => {
+    Donnees.changerMoi(b.dataset.jeSuis);
+    fermerFeuille();
+    pluieDeCoeurs(16);
+  }));
+}
 
 // Mode hors-ligne : le "service worker" garde une copie de l'appli sur l'iPhone
 if ("serviceWorker" in navigator) {

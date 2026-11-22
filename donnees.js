@@ -78,9 +78,10 @@ const Donnees = (() => {
     },
 
     // --- Mode essai seulement ---
-    changerMoi(qui) { etat.moi = qui; sauver(); },
+    changerMoi(qui) { etat.moi = qui; etat.moiChoisi = true; sauver(); },
+    moiChoisi: () => !!etat.moiChoisi, // a-t-on déjà dit qui tient ce téléphone ?
     changerSurnom(qui, surnom) { etat.profils[qui].surnom = surnom.trim() || etat.profils[qui].surnom; sauver(); },
-    remettreExemples() { const moi = etat.moi; etat = exemplesDeDepart(); etat.moi = moi; sauver(); },
+    remettreExemples() { const { moi, moiChoisi } = etat; etat = exemplesDeDepart(); Object.assign(etat, { moi, moiChoisi }); sauver(); },
 
     // --- Lire / ajouter / modifier / supprimer ---
     // « async » : avec Supabase, il faudra attendre la réponse d'Internet.
