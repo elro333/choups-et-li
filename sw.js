@@ -2,8 +2,11 @@
 // pour qu'elle s'ouvre même sans réseau.
 // À chaque nouvelle version mise en ligne, on change le numéro ci-dessous
 // pour que l'iPhone télécharge les nouveaux fichiers.
-const VERSION = "choupsli-v6";
-const FICHIERS = ["./", "index.html", "style.css", "idees.js", "demo.js", "donnees.js", "app.js", "verrou.js", "humeur.js", "cycle.js", "nous.js", "envies.js", "mots.js", "marvel.js", "films.js", "dates.js", "coin.js", "manifest.json", "icons/icon-180.png", "icons/icon-512.png"];
+const VERSION = "choupsli-v7";
+const SUPABASE_JS = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js";
+const FICHIERS = ["./", "index.html", "style.css", SUPABASE_JS, "config.js", "idees.js", "donnees.js", "app.js", "verrou.js", "connexion.js",
+  "humeur.js", "cycle.js", "nous.js", "envies.js", "mots.js", "marvel.js", "films.js", "dates.js", "coin.js",
+  "manifest.json", "icons/icon-180.png", "icons/icon-512.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FICHIERS)));
@@ -18,8 +21,12 @@ self.addEventListener("activate", (e) => {
 });
 
 // Réseau d'abord (pour avoir la dernière version), copie locale si pas de réseau.
+// On ne garde JAMAIS de copie de ce qui vient de la base (vos données) :
+// seulement les fichiers de l'appli.
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
+  const url = new URL(e.request.url);
+  if (url.origin !== location.origin && e.request.url !== SUPABASE_JS) return;
   e.respondWith(
     fetch(e.request)
       .then((rep) => {

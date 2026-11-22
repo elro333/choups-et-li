@@ -452,7 +452,7 @@ dialog form { padding: 8px 16px calc(var(--bas) + 24px); display: flex; flex-dir
 .groupe input, .groupe textarea, .groupe select {
   font: inherit; font-size: 17px; color: var(--texte); background: none; border: none; outline: none; min-width: 0;
 }
-.groupe input[type="text"], .groupe textarea { width: 100%; padding: 13px 16px; display: block; }
+.groupe input[type="text"], .groupe input[type="email"], .groupe input[type="password"], .groupe textarea { width: 100%; padding: 13px 16px; display: block; }
 .groupe textarea { min-height: 120px; resize: none; line-height: 1.45; }
 .groupe select, .groupe input[type="date"] { text-align: right; color: var(--accent); }
 .aide { font-size: 13px; color: var(--texte-2); margin: -8px 6px 0; }

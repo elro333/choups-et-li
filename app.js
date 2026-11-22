@@ -220,10 +220,9 @@ $("#btn-reglages").addEventListener("click", () => {
     titre: "Réglages",
     valider: "OK",
     html: `
-      <p class="muted"><span class="pastille-essai">Mode essai</span> Tout reste sur cet appareil, rien n'est envoyé. Tu es ${surnom(moi())} sur ce téléphone.</p>
+      <p class="muted" style="text-align:center">Connecté·e en tant que <b>${surnom(moi())}</b> 💗</p>
       <div class="groupe">
-        <label>Son surnom à elle <input type="text" name="surnom-choups" value="${surnom("choups")}" style="text-align:right;width:55%;padding:0"></label>
-        <label>Son surnom à lui <input type="text" name="surnom-li" value="${surnom("li")}" style="text-align:right;width:55%;padding:0"></label>
+        <label>Mon surnom <input type="text" name="surnom" value="${surnom(moi())}" maxlength="20" style="text-align:right;width:55%;padding:0"></label>
       </div>
       <div>
         <p class="surtitre" style="margin:0 6px 8px">🌸 Mon cycle</p>
@@ -234,21 +233,20 @@ $("#btn-reglages").addEventListener("click", () => {
         </div>
         <p class="aide" style="margin-top:6px">Activé : ${surnom(autre())} voit ta phase sur son accueil, avec une idée pour être là. Désactivé : rien n'est montré.</p>
       </div>
-      <button type="button" class="btn-secondaire" id="btn-remettre">Remettre les exemples</button>`,
+      <button type="button" class="btn-texte danger" id="btn-deconnexion">Se déconnecter</button>`,
     surValider(d) {
-      Donnees.changerSurnom("choups", d.get("surnom-choups"));
-      Donnees.changerSurnom("li", d.get("surnom-li"));
-      Donnees.modifierProfil(moi(), { cycle: {
-        actif: d.get("cycle-actif") === "on",
-        duree: Number(d.get("cycle-duree")),
-        regles: Number(d.get("cycle-regles")),
-      } });
+      Donnees.modifierProfil(moi(), {
+        surnom: d.get("surnom").trim() || Donnees.surnom(moi()),
+        cycle: {
+          actif: d.get("cycle-actif") === "on",
+          duree: Number(d.get("cycle-duree")),
+          regles: Number(d.get("cycle-regles")),
+        },
+      });
     },
   });
-  $("#btn-remettre").addEventListener("click", () => {
-    Donnees.remettreExemples();
-    fermerFeuille();
-    petitMessage("Exemples remis ✨");
+  $("#btn-deconnexion").addEventListener("click", () => {
+    if (confirm("Se déconnecter de Choups & Li sur ce téléphone ?")) Donnees.deconnecter();
   });
 });
 
@@ -279,35 +277,21 @@ Donnees.surChangement(afficher);
 // Tous les fichiers d'onglets sont chargés : on démarre sur « Nous »
 window.addEventListener("DOMContentLoaded", () => {
   boutonsOnglets[0].classList.add("active");
-  // Qui tient ce téléphone ?
-  // - le lien « …/choups-et-li/?moi=li » le dit directement ;
-  // - sinon, au tout premier lancement, l'appli pose la question une fois.
-  // Une fois choisi, c'est définitif sur ce téléphone (le lien ne change plus rien).
-  // (Avec Supabase, ce sera le compte connecté qui le dira.)
-  const demande = new URLSearchParams(location.search).get("moi");
-  if (Donnees.personnes().includes(demande) && !Donnees.moiChoisi()) Donnees.changerMoi(demande);
-  if (demande) history.replaceState(null, "", location.pathname); // on retire « ?moi=… » de l'adresse
+  if (location.search) history.replaceState(null, "", location.pathname); // un vieux lien « ?moi=… » ne sert plus
   afficher();
   requestAnimationFrame(placerPilule);
-  // D'abord le code (verrou.js), ensuite seulement la question « c'est qui ? »
-  Verrou.demarrer(() => { if (!Donnees.moiChoisi()) setTimeout(demanderQui, 300); });
-});
-
-function demanderQui() {
-  ouvrirFeuille({
-    titre: "Bienvenue 💕",
-    html: `
-      <p style="text-align:center;font-size:44px;margin:0">💗</p>
-      <p class="grand" style="text-align:center;margin:0">C'est qui sur ce téléphone ?</p>
-      ${Donnees.personnes().map((p) => `<button type="button" class="btn-principal" data-je-suis="${p}">Je suis ${surnom(p)}</button>`).join("")}
-      <p class="aide" style="text-align:center;margin:0">On ne le demande qu'une fois : ensuite, c'est pour de bon sur ce téléphone.</p>`,
+  // 1. le code (verrou.js) ; 2. la connexion, la première fois (connexion.js) ;
+  // 3. on charge vos données. C'est le compte qui dit si on est Choups ou Li.
+  Verrou.demarrer(async () => {
+    try {
+      if (!(await Donnees.session())) await Connexion.demander();
+      if (!(await Donnees.demarrer())) Connexion.pasRelie();
+    } catch (e) {
+      console.error(e);
+      petitMessage("Pas de connexion pour l'instant 😕");
+    }
   });
-  formFeuille.querySelectorAll("[data-je-suis]").forEach((b) => b.addEventListener("click", () => {
-    Donnees.changerMoi(b.dataset.jeSuis);
-    fermerFeuille();
-    pluieDeCoeurs(16);
-  }));
-}
+});
 
 // Mode hors-ligne : le "service worker" garde une copie de l'appli sur l'iPhone
 if ("serviceWorker" in navigator) {

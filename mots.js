@@ -121,6 +121,9 @@ function ecrireMot() {
 async function ouvrirLettre(id) {
   const m = (await Donnees.lister("mots")).find((x) => x.id === id);
   if (!m) return;
+  // Le texte vient de la base, qui ne le donne qu'à partir de la date
+  m.texte = await Donnees.texteLettre(id);
+  if (!m.texte) { petitMessage("Patience… 🤫"); return; }
   await Donnees.modifier("mots", id, { ouvert: true });
   ouvrirFeuille({
     titre: "💌",
