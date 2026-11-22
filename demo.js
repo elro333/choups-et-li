@@ -1,4 +1,5 @@
-// demo.js — les FAUX EXEMPLES du mode essai.
+// demo.js — les EXEMPLES du mode essai.
+// (Les envies, elles, sont la vraie liste de départ : voir idees.js.)
 //
 // Juste de quoi voir l'appli remplie pendant qu'on la construit.
 // Ce sont des exemples inventés, volontairement banals : vos vraies envies,
@@ -51,16 +52,8 @@ function exemplesDeDepart() {
       { id: id(), proprio: "choups", debut: dans(-1), creeLe: maintenant - jour },
     ],
 
-    envies: [
-      { id: id(), titre: "Pique-nique au coucher du soleil", detail: "Une couverture, du fromage, et on regarde le ciel changer de couleur.", categorie: "dehors", prix: 1, par: "li", avis: { choups: null, li: "oui" }, fait: false, creeLe: maintenant - 2 * heure },
-      { id: id(), titre: "Escape game à deux", detail: "Une heure pour sortir d'une pièce, en équipe.", categorie: "pluie", prix: 2, par: "li", avis: { choups: null, li: "oui" }, fait: false, creeLe: maintenant - 5 * heure },
-      { id: id(), titre: "Soirée crêpes et film", detail: "Chacun choisit une garniture surprise.", categorie: "cocooning", prix: 1, par: "choups", avis: { choups: "oui", li: null }, fait: false, creeLe: maintenant - jour },
-      { id: id(), titre: "Week-end à la montagne", detail: "Raquettes, chocolat chaud, chalet.", categorie: "voyage", prix: 3, par: "choups", avis: { choups: "oui", li: "oui" }, fait: false, creeLe: maintenant - 6 * jour },
-      { id: id(), titre: "Chacun habille l'autre en friperie", detail: "Budget serré, défilé obligatoire.", categorie: "jeux", prix: 1, par: "li", avis: { choups: "oui", li: "oui" }, fait: false, creeLe: maintenant - 9 * jour },
-      { id: id(), titre: "Marché de Noël", detail: "Vin chaud et petites lumières.", categorie: "hiver", prix: 1, par: "choups", avis: { choups: "oui", li: "oui" }, fait: false, creeLe: maintenant - 3 * jour },
-      { id: id(), titre: "Cours de cuisine", detail: "Apprendre une recette d'un autre pays.", categorie: "pluie", prix: 2, par: "choups", avis: { choups: "oui", li: "oui" }, fait: true, faitLe: dans(-20), souvenir: "On a raté la pâte la première fois, et on a ri pendant dix minutes.", creeLe: maintenant - 40 * jour },
-      { id: id(), titre: "Karaoké", detail: "", categorie: "jeux", prix: 2, par: "li", avis: { choups: "non", li: "oui" }, fait: false, creeLe: maintenant - 12 * jour },
-    ],
+    // Les envies : la vraie liste de départ (idees.js), sans réponse de Li pour l'instant
+    envies: enviesDeDepart(maintenant),
 
     mots: [
       { id: id(), de: "li", texte: "Bonne journée, je pense à toi 💭", ouvrirLe: null, creeLe: maintenant - 40 * 60 * 1000 },

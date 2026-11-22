@@ -62,7 +62,7 @@ async function afficherNous(ecran) {
     html += `
       <button class="carte" data-aller="envies">
         <span class="etiquette">✨ Envies</span>
-        <span class="grand" style="display:block">${aRepondre.length} idée${s ? "s" : ""} de ${surnom(autre())} ${s ? "t'attendent" : "t'attend"}</span>
+        <span class="grand" style="display:block">${aRepondre.length} idée${s ? "s" : ""} ${s ? "t'attendent" : "t'attend"}</span>
         <span class="muted" style="display:block">${echapper(aRepondre[0].titre)}${s ? "…" : ""}</span>
         <span class="fleche">›</span>
       </button>`;

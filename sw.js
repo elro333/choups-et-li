@@ -2,8 +2,8 @@
 // pour qu'elle s'ouvre même sans réseau.
 // À chaque nouvelle version mise en ligne, on change le numéro ci-dessous
 // pour que l'iPhone télécharge les nouveaux fichiers.
-const VERSION = "choupsli-v3";
-const FICHIERS = ["./", "index.html", "style.css", "demo.js", "donnees.js", "app.js", "humeur.js", "cycle.js", "nous.js", "envies.js", "mots.js", "marvel.js", "films.js", "dates.js", "coin.js", "manifest.json", "icons/icon-180.png", "icons/icon-512.png"];
+const VERSION = "choupsli-v4";
+const FICHIERS = ["./", "index.html", "style.css", "idees.js", "demo.js", "donnees.js", "app.js", "humeur.js", "cycle.js", "nous.js", "envies.js", "mots.js", "marvel.js", "films.js", "dates.js", "coin.js", "manifest.json", "icons/icon-180.png", "icons/icon-512.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FICHIERS)));

@@ -24,7 +24,7 @@
 // Et pour chaque personne, un « profil » : { surnom, cycle: { actif, duree, regles } }
 
 const Donnees = (() => {
-  const CLE = "choupsli-essai-v1";
+  const CLE = "choupsli-essai-v2"; // v2 : nouvelle liste d'envies de départ
   const PERSONNES = ["choups", "li"]; // deux identifiants techniques, pas de vrais prénoms
   let etat = charger();
   const ecouteurs = [];

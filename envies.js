@@ -2,6 +2,7 @@
 //
 // Chacun propose ; l'autre répond « oui, j'ai envie » ou « non merci ».
 // Celui qui propose a forcément envie : son avis est « oui » d'office.
+// Les idées de la liste de départ (idees.js, par = "liste") : chacun répond.
 // Quand les deux disent oui : pluie de cœurs, l'envie passe dans « On veut ».
 // Quand c'est fait : on note la date et un petit souvenir.
 //
@@ -21,7 +22,7 @@ const CATEGORIES = {
 const emojiCategorie = (c) => CATEGORIES[c]?.emoji || "💗";
 const PRIX = ["", "💶", "💶💶", "💶💶💶"];
 
-let ecranEnvies = "veut";   // "voir", "veut" ou "faites"
+let ecranEnvies = "voir";   // "voir", "veut" ou "faites"
 let filtreEnvies = "tout";  // une catégorie, ou "tout"
 
 enregistrerVue("envies", {
@@ -67,7 +68,11 @@ async function afficherEnvies(ecran) {
   if (ecranEnvies === "voir") {
     const enAttente = filtrer(parEtat("en-attente"));
     const non = filtrer(parEtat("non"));
-    html += sectionEnvies(`Les idées de ${surnom(autre())}`, filtrer(aRepondre), "Tu as répondu à tout 🥰");
+    const deLautre = filtrer(aRepondre.filter((e) => e.par === autre()));
+    const aTrier = filtrer(aRepondre.filter((e) => e.par !== autre()));
+    if (!deLautre.length && !aTrier.length) html += `<div class="vide"><span class="grand-emoji">🥰</span>Tu as répondu à tout.</div>`;
+    html += sectionEnvies(`Les idées de ${surnom(autre())}`, deLautre);
+    html += sectionEnvies("Idées à trier", aTrier);
     if (enAttente.length) html += sectionEnvies(`Tes idées, en attente de ${surnom(autre())}`, enAttente);
     if (non.length) html += `<details class="replie"><summary>Pas pour cette fois (${non.length})</summary>${non.map(carteEnvie).join("")}</details>`;
   } else if (ecranEnvies === "veut") {
@@ -217,7 +222,7 @@ function detailEnvie(e) {
         <div style="font-size:48px">${emojiCategorie(e.categorie)}</div>
         <p class="grand" style="margin:6px 0 2px">${echapper(e.titre)}</p>
         ${e.detail ? `<p class="muted">${echapper(e.detail)}</p>` : ""}
-        <p class="muted" style="margin-top:8px">Proposée par ${surnom(e.par)} · ${CATEGORIES[e.categorie]?.nom || ""} ${e.prix ? "· " + PRIX[e.prix] : ""}</p>
+        <p class="muted" style="margin-top:8px">${e.par === "liste" ? "Idée de la liste" : "Proposée par " + surnom(e.par)} · ${CATEGORIES[e.categorie]?.nom || ""} ${e.prix ? "· " + PRIX[e.prix] : ""}</p>
       </div>
       ${e.fait && e.souvenir ? `<div class="souvenir">${echapper(e.souvenir)}</div>` : ""}
       ${!miennes && !e.fait ? `
