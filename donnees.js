@@ -17,6 +17,9 @@
 //   mots   : { id, de, texte, ouvrirLe (date ou null = tout de suite), ouvert, creeLe }
 //   dates  : { id, titre, date, emoji, note, creeLe }
 //   coin   : { id, proprio, texte, type ("cadeau" ou "surprise"), fait, creeLe }
+//   humeurs: { id, qui, jour ("AAAA-MM-JJ"), emoji, mot, creeLe }
+//   cycle  : { id, proprio, debut ("AAAA-MM-JJ" = 1er jour des règles), creeLe }
+// Et pour chaque personne, un « profil » : { surnom, cycle: { actif, duree, regles } }
 
 const Donnees = (() => {
   const CLE = "choupsli-essai-v1";
@@ -28,9 +31,17 @@ const Donnees = (() => {
   function charger() {
     try {
       const brut = localStorage.getItem(CLE);
-      if (brut) return JSON.parse(brut);
+      if (brut) return completer(JSON.parse(brut));
     } catch (e) { /* mémoire illisible ou bloquée : on repart des exemples */ }
     return exemplesDeDepart(); // défini dans demo.js
+  }
+
+  // Une mémoire enregistrée par une version plus ancienne de l'appli :
+  // on ajoute ce qui manque (les nouvelles tables) sans rien effacer.
+  function completer(e) {
+    for (const table of ["envies", "mots", "dates", "coin", "humeurs", "cycle"]) e[table] ||= [];
+    for (const qui of PERSONNES) e.profils[qui] ||= { surnom: qui };
+    return e;
   }
 
   function sauver() {
@@ -45,6 +56,8 @@ const Donnees = (() => {
   // de sécurité de la base (« Row Level Security ») qui feront ce travail.
   function visible(table, ligne) {
     if (table === "coin") return ligne.proprio === etat.moi;  // le coin perso : rien que pour soi
+    // le cycle : visible par l'autre seulement si sa propriétaire a choisi de le partager
+    if (table === "cycle") return ligne.proprio === etat.moi || !!etat.profils[ligne.proprio]?.cycle?.actif;
     return true;
   }
 
@@ -54,6 +67,13 @@ const Donnees = (() => {
     autre: () => (etat.moi === "choups" ? "li" : "choups"),
     surnom: (qui) => etat.profils[qui]?.surnom || qui,
     personnes: () => PERSONNES.slice(),
+    // Le profil (surnom, réglages du cycle). On rend une copie : on le change avec modifierProfil.
+    profil: (qui) => structuredClone(etat.profils[qui] || {}),
+    async modifierProfil(qui, champs) {
+      if (qui !== etat.moi) return; // on ne change que son propre profil
+      Object.assign(etat.profils[qui], champs);
+      sauver();
+    },
 
     // --- Mode essai seulement ---
     changerMoi(qui) { etat.moi = qui; sauver(); },

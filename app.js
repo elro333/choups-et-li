@@ -215,6 +215,7 @@ function petitMessage(texte) {
 $("#btn-reglages").addEventListener("click", () => {
   const options = Donnees.personnes().map((p) =>
     `<button type="button" data-qui="${p}" class="${p === moi() ? "active" : ""}">${surnom(p)}</button>`).join("");
+  const cycle = Donnees.profil(moi()).cycle || { actif: false, duree: 28, regles: 5 };
   ouvrirFeuille({
     titre: "Réglages",
     valider: "OK",
@@ -229,10 +230,24 @@ $("#btn-reglages").addEventListener("click", () => {
         <label>Son surnom à elle <input type="text" name="surnom-choups" value="${surnom("choups")}" style="text-align:right;width:55%;padding:0"></label>
         <label>Son surnom à lui <input type="text" name="surnom-li" value="${surnom("li")}" style="text-align:right;width:55%;padding:0"></label>
       </div>
+      <div>
+        <p class="surtitre" style="margin:0 6px 8px">🌸 Mon cycle</p>
+        <div class="groupe">
+          <label>Partager mon cycle <input type="checkbox" class="interrupteur" name="cycle-actif" ${cycle.actif ? "checked" : ""}></label>
+          <label>Durée du cycle <select name="cycle-duree">${[...Array(15)].map((_, i) => 21 + i).map((n) => `<option value="${n}" ${n == (cycle.duree || 28) ? "selected" : ""}>${n} jours</option>`).join("")}</select></label>
+          <label>Durée des règles <select name="cycle-regles">${[3, 4, 5, 6, 7, 8].map((n) => `<option value="${n}" ${n == (cycle.regles || 5) ? "selected" : ""}>${n} jours</option>`).join("")}</select></label>
+        </div>
+        <p class="aide" style="margin-top:6px">Activé : ${surnom(autre())} voit ta phase sur son accueil, avec une idée pour être là. Désactivé : rien n'est montré.</p>
+      </div>
       <button type="button" class="btn-secondaire" id="btn-remettre">Remettre les exemples</button>`,
     surValider(d) {
       Donnees.changerSurnom("choups", d.get("surnom-choups"));
       Donnees.changerSurnom("li", d.get("surnom-li"));
+      Donnees.modifierProfil(moi(), { cycle: {
+        actif: d.get("cycle-actif") === "on",
+        duree: Number(d.get("cycle-duree")),
+        regles: Number(d.get("cycle-regles")),
+      } });
     },
   });
   formFeuille.querySelectorAll("#choix-moi button").forEach((b) =>

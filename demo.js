@@ -24,7 +24,22 @@ function exemplesDeDepart() {
 
   return {
     moi: "choups",
-    profils: { choups: { surnom: "Choups" }, li: { surnom: "Li" } },
+    profils: {
+      choups: { surnom: "Choups", cycle: { actif: true, duree: 28, regles: 5 } },
+      li: { surnom: "Li" },
+    },
+
+    // L'humeur du jour : Li a déjà rempli la sienne, Choups pas encore
+    humeurs: [
+      { id: id(), qui: "li", jour: dans(0), emoji: "🙂", mot: "Grosse journée", creeLe: maintenant - 3 * heure },
+      { id: id(), qui: "choups", jour: dans(-1), emoji: "🥰", mot: "", creeLe: maintenant - 20 * heure },
+    ],
+
+    // Exemple de cycle : règles commencées il y a 1 jour (donc jour 2)
+    cycle: [
+      { id: id(), proprio: "choups", debut: dans(-29), creeLe: maintenant - 29 * jour },
+      { id: id(), proprio: "choups", debut: dans(-1), creeLe: maintenant - jour },
+    ],
 
     envies: [
       { id: id(), titre: "Pique-nique au coucher du soleil", detail: "Une couverture, du fromage, et on regarde le ciel changer de couleur.", categorie: "dehors", prix: 1, par: "li", avis: { choups: null, li: "oui" }, fait: false, creeLe: maintenant - 2 * heure },

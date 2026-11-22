@@ -315,6 +315,26 @@ button.carte.enveloppe { display: flex; }
 .lettre-ouverte .signature { display: block; text-align: right; margin-top: 14px; font-weight: 700; color: var(--accent); }
 @keyframes deplie { from { transform: scale(.6) rotate(-4deg); opacity: 0; } }
 
+/* ---------- Humeur du jour ---------- */
+.rangee-humeurs { display: flex; justify-content: space-between; gap: 2px; margin: 10px -4px 4px; }
+.rangee-humeurs button {
+  border: none; background: none; font-size: 27px; width: 40px; height: 44px; border-radius: 14px; padding: 0; cursor: pointer;
+  filter: grayscale(.35); opacity: .75; transition: transform .2s, filter .2s, opacity .2s, background .2s;
+}
+.rangee-humeurs button.choisie { filter: none; opacity: 1; background: var(--accent-doux); transform: scale(1.15); }
+.btn-texte.petit { font-size: 14px; padding: 2px 0; font-weight: 600; }
+.humeur-autre { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 0.5px solid var(--separateur); font-size: 15px; overflow-wrap: anywhere; }
+.humeur-autre .grosse { font-size: 26px; flex: none; }
+
+/* ---------- Cycle ---------- */
+.carte.cycle .texte-cycle { margin: 8px 0 0; font-size: 16px; line-height: 1.4; }
+.carte.phase-regles { box-shadow: inset 0 1px 0 var(--reflet), inset 0 0 0 1.5px rgba(240,120,160,.35), var(--ombre); }
+.phases { display: flex; flex-direction: column; gap: 8px; }
+.phase { display: flex; gap: 12px; padding: 12px 14px; border-radius: 20px; background: var(--champ); opacity: .75; }
+.phase.actuelle { opacity: 1; box-shadow: 0 0 0 2px var(--accent); }
+.phase .emoji { font-size: 26px; flex: none; }
+.phase p { margin: 3px 0 0; }
+
 /* ---------- Nos dates (une frise) ---------- */
 .frise { position: relative; padding-left: 26px; }
 .frise::before { content: ""; position: absolute; left: 10px; top: 14px; bottom: 14px; width: 2px; border-radius: 2px; background: linear-gradient(var(--lilas), var(--rose), var(--corail)); opacity: .6; }

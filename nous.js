@@ -2,6 +2,7 @@
 //
 // Rien qui oblige, rien qui compte les jours : juste ce qui fait plaisir.
 // - le dernier petit mot de l'autre (ou une lettre qui attend d'être ouverte) ;
+// - l'humeur du jour de chacun, et le cycle s'il est partagé ;
 // - les envies de l'autre qui attendent ta réponse ;
 // - une date à fêter bientôt ;
 // - « On fait quoi ? » : le dé qui tire une envie au hasard ;
@@ -19,7 +20,8 @@ enregistrerVue("nous", {
 });
 
 async function afficherNous(ecran) {
-  const [mots, envies, dates] = await Promise.all([Donnees.lister("mots"), Donnees.lister("envies"), Donnees.lister("dates")]);
+  const [mots, envies, dates, humeurs, cycle] = await Promise.all(
+    ["mots", "envies", "dates", "humeurs", "cycle"].map((t) => Donnees.lister(t)));
   const aujourdhui = jourISO();
   let html = "";
 
@@ -35,7 +37,11 @@ async function afficherNous(ecran) {
       </button>`;
   }
 
-  // 2. Le dernier petit mot reçu
+  // 2. L'humeur du jour (humeur.js) et le cycle, s'il est partagé (cycle.js)
+  html += carteHumeur(humeurs);
+  html += carteCycle(cycle);
+
+  // 3. Le dernier petit mot reçu
   const recus = mots
     .filter((m) => m.de === autre() && (!m.ouvrirLe || m.ouvert))
     .sort((a, b) => b.creeLe - a.creeLe);
@@ -49,7 +55,7 @@ async function afficherNous(ecran) {
       </button>`;
   }
 
-  // 3. Les envies qui attendent ta réponse
+  // 4. Les envies qui attendent ta réponse
   const aRepondre = envies.filter((e) => !e.fait && e.avis[moi()] == null);
   if (aRepondre.length) {
     const s = aRepondre.length > 1;
@@ -62,7 +68,7 @@ async function afficherNous(ecran) {
       </button>`;
   }
 
-  // 4. Une date à fêter dans les 45 prochains jours
+  // 5. Une date à fêter dans les 45 prochains jours
   const bientot = prochainesDates(dates).find((d) => d.dans <= 45);
   if (bientot) {
     html += `
@@ -73,7 +79,7 @@ async function afficherNous(ecran) {
       </button>`;
   }
 
-  // 5. Le dé : une envie commune tirée au hasard
+  // 6. Le dé : une envie commune tirée au hasard
   const communes = envies.filter((e) => !e.fait && e.avis.choups === "oui" && e.avis.li === "oui");
   if (communes.length) {
     html += `
@@ -84,7 +90,7 @@ async function afficherNous(ecran) {
       </div>`;
   }
 
-  // 6. Un souvenir qui remonte (une envie faite, avec son souvenir)
+  // 7. Un souvenir qui remonte (une envie faite, avec son souvenir)
   const souvenirs = envies.filter((e) => e.fait && e.souvenir);
   if (souvenirs.length) {
     const s = souvenirs[Math.floor(Math.random() * souvenirs.length)];
@@ -97,7 +103,7 @@ async function afficherNous(ecran) {
       </div>`;
   }
 
-  // 7. Le bouton bisou : un mot en un geste, sans rien écrire
+  // 8. Le bouton bisou : un mot en un geste, sans rien écrire
   html += `
     <div class="boutons" style="margin-top:4px">
       <button class="btn-principal" id="btn-bisou">Envoyer un bisou 😘</button>
@@ -105,6 +111,8 @@ async function afficherNous(ecran) {
 
   ecran.innerHTML = html;
 
+  brancherHumeur(ecran, humeurs);
+  brancherCycle(ecran, cycle);
   ecran.querySelector("[data-lettre]")?.addEventListener("click", (e) => ouvrirLettre(e.currentTarget.dataset.lettre));
   $("#btn-bisou").addEventListener("click", () => envoyerMot("😘"));
   $("#btn-de")?.addEventListener("click", () => {
