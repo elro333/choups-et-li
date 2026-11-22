@@ -19,6 +19,8 @@
 //   coin   : { id, proprio, texte, type ("cadeau" ou "surprise"), fait, creeLe }
 //   humeurs: { id, qui, jour ("AAAA-MM-JJ"), emoji, mot, creeLe }
 //   cycle  : { id, proprio, debut ("AAAA-MM-JJ" = 1er jour des règles), creeLe }
+//   marvel : { id, cle (voir marvel.js), statut ("a-voir", "en-cours", "vu") }
+//   films  : { id, titre, par, statut ("a-voir" ou "vu"), notes: {choups, li}, creeLe }
 // Et pour chaque personne, un « profil » : { surnom, cycle: { actif, duree, regles } }
 
 const Donnees = (() => {
@@ -39,7 +41,7 @@ const Donnees = (() => {
   // Une mémoire enregistrée par une version plus ancienne de l'appli :
   // on ajoute ce qui manque (les nouvelles tables) sans rien effacer.
   function completer(e) {
-    for (const table of ["envies", "mots", "dates", "coin", "humeurs", "cycle"]) e[table] ||= [];
+    for (const table of ["envies", "mots", "dates", "coin", "humeurs", "cycle", "marvel", "films"]) e[table] ||= [];
     for (const qui of PERSONNES) e.profils[qui] ||= { surnom: qui };
     return e;
   }

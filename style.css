@@ -335,6 +335,26 @@ button.carte.enveloppe { display: flex; }
 .phase .emoji { font-size: 26px; flex: none; }
 .phase p { margin: 3px 0 0; }
 
+/* ---------- Films ---------- */
+.carte.doomsday .grand { margin-top: 4px; }
+.barre { height: 10px; border-radius: 5px; background: rgba(140,90,120,.15); margin: 12px 0 8px; overflow: hidden; }
+.barre span { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--lilas), var(--rose), var(--corail)); transition: width .6s cubic-bezier(.2,.8,.2,1); }
+.liste-films { padding: 6px 16px; }
+.liste-films .annee { font-size: 13px; font-weight: 700; color: var(--accent); padding: 12px 2px 2px; }
+.film { display: flex; align-items: center; gap: 12px; padding: 10px 2px; }
+.film + .film { border-top: 0.5px solid var(--separateur); }
+.film .infos { flex: 1; min-width: 0; cursor: pointer; }
+.film .t { font-size: 16px; overflow-wrap: anywhere; }
+.film .m { font-size: 12.5px; color: var(--texte-2); margin-top: 1px; }
+.film .m b { color: var(--accent); }
+.film.vu .t { color: var(--texte-2); }
+.film.prochain .t { font-weight: 700; }
+.film.final .t { font-weight: 800; color: var(--accent); }
+.case.en-cours { border-color: var(--corail); color: var(--corail); font-size: 15px; }
+.etoiles { display: flex; justify-content: center; gap: 6px; }
+.etoiles button { border: none; background: none; font-size: 34px; color: rgba(160,100,130,.3); cursor: pointer; padding: 0 2px; }
+.etoiles button.pleine { color: #f5b942; }
+
 /* ---------- Nos dates (une frise) ---------- */
 .frise { position: relative; padding-left: 26px; }
 .frise::before { content: ""; position: absolute; left: 10px; top: 14px; bottom: 14px; width: 2px; border-radius: 2px; background: linear-gradient(var(--lilas), var(--rose), var(--corail)); opacity: .6; }
@@ -365,9 +385,9 @@ button.carte.enveloppe { display: flex; }
   display: flex; justify-content: center; padding: 0 12px; pointer-events: none;
 }
 .dock > * { pointer-events: auto; }
-/* 5 onglets : leur largeur s'adapte à l'écran (393 px sur l'iPhone 15) */
+/* 6 onglets : leur largeur s'adapte à l'écran (393 px sur l'iPhone 15) */
 .onglets { display: flex; border-radius: 999px; padding: 4px; position: relative;
-  --l-onglet: min(78px, calc((100vw - 24px - 8px) / 5));
+  --l-onglet: min(72px, calc((100vw - 24px - 8px) / 6));
   touch-action: none; -webkit-user-select: none; user-select: none; }
 .onglets button {
   position: relative; z-index: 1;

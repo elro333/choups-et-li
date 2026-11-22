@@ -29,6 +29,16 @@ function exemplesDeDepart() {
       li: { surnom: "Li" },
     },
 
+    // Marvel : les premiers films déjà vus, une série en cours
+    marvel: ["iron-man", "hulk", "iron-man-2", "thor", "first-avenger", "avengers"]
+      .map((cle) => ({ id: id(), cle, statut: "vu" })),
+
+    films: [
+      { id: id(), titre: "Un grand classique en noir et blanc", par: "li", statut: "a-voir", notes: {}, creeLe: maintenant - 2 * jour },
+      { id: id(), titre: "Une comédie romantique de Noël", par: "choups", statut: "a-voir", notes: {}, creeLe: maintenant - jour },
+      { id: id(), titre: "Un film de science-fiction", par: "li", statut: "vu", notes: { li: 5, choups: 4 }, creeLe: maintenant - 10 * jour },
+    ],
+
     // L'humeur du jour : Li a déjà rempli la sienne, Choups pas encore
     humeurs: [
       { id: id(), qui: "li", jour: dans(0), emoji: "🙂", mot: "Grosse journée", creeLe: maintenant - 3 * heure },
