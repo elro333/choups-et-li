@@ -1,0 +1,86 @@
+<!doctype html>
+<!--
+  icone.html — le dessin de l'icône (la source).
+  Deux petits cœurs qui se tiennent la main, « Choups » dans l'un,
+  « Li » dans l'autre, et un & fondu entre les deux.
+  Les images icon-180.png et icon-512.png sont des photos de cette page,
+  prises par Edge (commande dans le fichier LISEZMOI de ce dossier… ou demande à Claude).
+-->
+<html><head><meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 512px; height: 512px; overflow: hidden; background: #fff1ec; }
+  svg { display: block; }
+</style></head>
+<body>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Le fond : un ciel de coucher de soleil, tout doux -->
+    <linearGradient id="ciel" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#e6ddff"/>
+      <stop offset=".5" stop-color="#ffdbe5"/>
+      <stop offset="1" stop-color="#ffd2bf"/>
+    </linearGradient>
+    <radialGradient id="soleil" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#fff6ef" stop-opacity=".95"/>
+      <stop offset="1" stop-color="#fff6ef" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Les deux cœurs -->
+    <linearGradient id="coeur-g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff9a76"/>
+      <stop offset="1" stop-color="#e8507a"/>
+    </linearGradient>
+    <linearGradient id="coeur-d" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ef5f8c"/>
+      <stop offset="1" stop-color="#9c86f2"/>
+    </linearGradient>
+    <!-- Le reflet de verre sur chaque cœur -->
+    <linearGradient id="reflet" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".55"/>
+      <stop offset=".55" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="ombre" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#b0406a" flood-opacity=".28"/>
+    </filter>
+    <filter id="lueur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="flou"/>
+      <feMerge><feMergeNode in="flou"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <path id="coeur" d="M0 -28 C -12 -55 -60 -48 -60 -12 C -60 22 -22 42 0 62 C 22 42 60 22 60 -12 C 60 -48 12 -55 0 -28 Z"/>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#ciel)"/>
+  <circle cx="256" cy="150" r="170" fill="url(#soleil)"/>
+  <!-- petites étincelles -->
+  <g fill="#fff" opacity=".9">
+    <path d="M92 92 l5 13 13 5 -13 5 -5 13 -5 -13 -13 -5 13 -5z"/>
+    <path d="M420 110 l4 10 10 4 -10 4 -4 10 -4 -10 -10 -4 10 -4z"/>
+    <path d="M430 410 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3z"/>
+    <circle cx="80" cy="400" r="5"/>
+  </g>
+
+  <!-- Les petits bras qui se tiennent, sous le & -->
+  <g fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round">
+    <path d="M222 318 C 232 332, 242 336, 252 334"/>
+    <path d="M290 318 C 280 332, 270 336, 260 334"/>
+  </g>
+  <!-- les deux mains jointes : un tout petit cœur -->
+  <path transform="translate(256 333) scale(.2)" d="M0 -28 C -12 -55 -60 -48 -60 -12 C -60 22 -22 42 0 62 C 22 42 60 22 60 -12 C 60 -48 12 -55 0 -28 Z" fill="#fff"/>
+
+  <!-- Le cœur de gauche : Choups -->
+  <g transform="translate(150 245) rotate(-11) scale(1.58)" filter="url(#ombre)">
+    <use href="#coeur" fill="url(#coeur-g)"/>
+    <use href="#coeur" fill="url(#reflet)"/>
+    <text x="-5" y="13" text-anchor="middle" font-family="'Segoe Print', 'Comic Sans MS', cursive" font-weight="700" font-size="23" fill="#fff">Choups</text>
+  </g>
+
+  <!-- Le cœur de droite : Li -->
+  <g transform="translate(362 245) rotate(11) scale(1.58)" filter="url(#ombre)">
+    <use href="#coeur" fill="url(#coeur-d)"/>
+    <use href="#coeur" fill="url(#reflet)"/>
+    <text x="0" y="20" text-anchor="middle" font-family="'Segoe Print', 'Comic Sans MS', cursive" font-weight="700" font-size="40" fill="#fff">Li</text>
+  </g>
+
+  <!-- Le & fondu entre les deux -->
+  <text x="256" y="292" text-anchor="middle" font-family="'Segoe Script', 'Brush Script MT', cursive" font-size="92" fill="#fff" fill-opacity=".96" stroke="#f07aa0" stroke-width="2" stroke-opacity=".5" filter="url(#lueur)">&amp;</text>
+</svg>
+</body></html>

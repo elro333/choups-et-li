@@ -1,0 +1,128 @@
+<!doctype html>
+<!--
+  Choups & Li — notre petite appli à deux.
+
+  index.html = le SQUELETTE (ce qu'il y a à l'écran).
+  style.css  = l'APPARENCE (couleurs, verre, vagues, cœurs).
+  donnees.js = la MÉMOIRE (où sont rangés les envies, les mots, les dates).
+  app.js     = le CHEF D'ORCHESTRE (onglets, feuilles, petits outils).
+  nous.js, envies.js, mots.js, dates.js, coin.js = un fichier par onglet.
+
+  Règle d'or : aucun vrai prénom, aucune donnée perso dans ce code.
+  Tout ce qu'on se dit vit dans la base de données, protégée.
+-->
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <!-- viewport-fit=cover : l'appli occupe tout l'écran, encoche comprise. Pas de zoom. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Choups &amp; Li</title>
+
+  <!-- Ces lignes rendent l'appli "installable" sur l'iPhone -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" href="icons/icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Choups &amp; Li">
+  <meta name="theme-color" content="#fff1ec" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1b1640" media="(prefers-color-scheme: dark)">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Le fond : un coucher de soleil le jour, une nuit étoilée le soir.
+       C'est lui qu'on voit "à travers le verre". -->
+  <div class="fond-couleurs" aria-hidden="true"></div>
+  <div class="etoiles" aria-hidden="true"></div>
+
+  <!-- Barre du haut : invisible au repos, elle devient du verre quand on fait défiler -->
+  <header class="barre-haut" id="barre-haut">
+    <span id="titre-petit"></span>
+  </header>
+
+  <main>
+    <!-- L'horizon : le soleil sur la mer (clair) ou la lune (sombre) -->
+    <div class="horizon" aria-hidden="true">
+      <svg viewBox="0 0 400 140" preserveAspectRatio="none">
+        <circle class="soleil" cx="300" cy="78" r="38"/>
+        <path class="lune" d="M300 40a36 36 0 1 0 30 58a30 30 0 0 1 -30 -58z"/>
+        <path class="vague v1" d="M0 92 C70 76 130 104 200 92 S330 78 400 90 V140 H0Z"/>
+        <path class="vague v2" d="M0 110 C80 98 150 122 230 108 S350 100 400 112 V140 H0Z"/>
+      </svg>
+    </div>
+
+    <div class="grand-titre">
+      <div>
+        <p id="sous-titre" class="surtitre"></p>
+        <h1 id="titre">Choups &amp; Li</h1>
+      </div>
+      <!-- En haut à droite : + (ajouter) et … (réglages) -->
+      <div class="actions-haut">
+        <button id="btn-ajouter" class="btn-rond-verre verre" aria-label="Ajouter">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <button id="btn-reglages" class="btn-rond-verre verre" aria-label="Réglages">
+          <svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Un écran par onglet. Chaque fichier .js remplit le sien. -->
+    <section class="vue active" id="vue-nous"></section>
+    <section class="vue" id="vue-envies"></section>
+    <section class="vue" id="vue-mots"></section>
+    <section class="vue" id="vue-dates"></section>
+    <section class="vue" id="vue-coin"></section>
+  </main>
+
+  <!-- La barre d'onglets flottante, en verre. On peut faire glisser le doigt dessus. -->
+  <div class="dock">
+    <nav class="onglets verre-fort">
+      <span class="pilule" id="pilule" aria-hidden="true"></span>
+      <button data-vue="nous">
+        <svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.4-7.5-10A4.3 4.3 0 0 1 12 7.3 4.3 4.3 0 0 1 19.5 10c0 5.6-7.5 10-7.5 10z"/></svg>
+        Nous
+      </button>
+      <button data-vue="envies">
+        <svg viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18.5 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>
+        Envies
+      </button>
+      <button data-vue="mots">
+        <svg viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="3"/><path d="M3.5 7l8.5 6 8.5-6"/></svg>
+        Mots
+      </button>
+      <button data-vue="dates">
+        <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 17.3s-2.6-1.5-2.6-3.3a1.4 1.4 0 0 1 2.6-.8 1.4 1.4 0 0 1 2.6.8c0 1.8-2.6 3.3-2.6 3.3z"/></svg>
+        Dates
+      </button>
+      <button data-vue="coin">
+        <svg viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11.5" rx="2.5"/><path d="M2.5 9h19M12 9v11.5"/><path d="M12 9c-1.5-3.5-5.5-4-5.5-1.5S10 9 12 9zM12 9c1.5-3.5 5.5-4 5.5-1.5S14 9 12 9z"/></svg>
+        Mon coin
+      </button>
+    </nav>
+  </div>
+
+  <!-- La feuille qui monte du bas : son contenu change selon ce qu'on fait (app.js) -->
+  <dialog class="feuille" id="feuille">
+    <form id="feuille-form"></form>
+  </dialog>
+
+  <!-- Petits messages qui apparaissent puis disparaissent (« Envoyé 💌 ») -->
+  <div class="toast verre" id="toast" hidden></div>
+  <!-- La pluie de cœurs -->
+  <div id="coeurs" aria-hidden="true"></div>
+
+  <!-- L'ordre compte : les exemples, la mémoire, puis le chef d'orchestre, puis les onglets -->
+  <script src="demo.js"></script>
+  <script src="donnees.js"></script>
+  <script src="app.js"></script>
+  <script src="nous.js"></script>
+  <script src="envies.js"></script>
+  <script src="mots.js"></script>
+  <script src="dates.js"></script>
+  <script src="coin.js"></script>
+</body>
+</html>

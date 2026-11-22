@@ -1,0 +1,451 @@
+/* ============================================================
+   style.css — l'apparence de Choups & Li
+
+   Le fonctionnement d'une appli Apple (verre flou, barre qui glisse,
+   feuilles qui montent du bas), mais en plus doux :
+   - le jour : un coucher de soleil sur la mer (pêche, rose, lilas) ;
+   - le soir (mode sombre de l'iPhone) : une nuit étoilée, lune rose.
+   Formes rondes, police arrondie, petits cœurs.
+
+   Le secret du verre (comme dans TODOS) :
+   1. un fond coloré derrière (.fond-couleurs) ;
+   2. des surfaces à moitié transparentes ;
+   3. backdrop-filter: blur(...) qui floute ce qu'il y a derrière ;
+   4. un liseré clair en haut, comme un reflet de lumière.
+   ============================================================ */
+
+/* ---------- Les couleurs : le jour (coucher de soleil) ---------- */
+:root {
+  --rose: #e0567a;
+  --corail: #f0855f;
+  --lilas: #9a8cf0;
+  --menthe: #3fb98a;
+  --gris: #a1909a;
+
+  --accent: var(--rose);
+  --accent-doux: rgba(224, 86, 122, .13);  /* fond rose très léger */
+  --fond: #fff1ec;
+  --texte: #4a1b2c;                       /* prune foncé plutôt que noir : plus doux */
+  --texte-2: rgba(110, 50, 75, .62);
+  --separateur: rgba(140, 70, 95, .16);
+  --carte: rgba(255, 255, 255, .74);
+  --champ: #fff;
+
+  --verre: rgba(255, 255, 255, .5);
+  --reflet: rgba(255, 255, 255, .9);
+  --bord-verre: rgba(255, 255, 255, .6);
+  --ombre: 0 10px 36px rgba(170, 70, 90, .12), 0 2px 8px rgba(170, 70, 90, .05);
+
+  /* Les trois taches du fond */
+  --tache-1: rgba(190, 180, 255, .75);   /* lilas, en haut */
+  --tache-2: rgba(255, 170, 195, .7);    /* rose, à droite */
+  --tache-3: rgba(255, 175, 130, .65);   /* pêche, en bas */
+  /* L'horizon */
+  --astre: #f7956b;
+  --vague-1: rgba(255, 190, 205, .75);
+  --vague-2: rgba(255, 241, 236, .95);
+
+  --bas: env(safe-area-inset-bottom, 0px);
+  --haut: env(safe-area-inset-top, 0px);
+  /* ui-rounded = la police arrondie d'Apple (SF Pro Rounded) sur iPhone.
+     Sur le PC, on retombe sur une police normale : c'est prévu. */
+  --police: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+}
+
+/* ---------- Les couleurs : le soir (nuit étoilée) ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --rose: #f491b2;
+    --corail: #f6a389;
+    --lilas: #b3a8ff;
+    --menthe: #6fd6ad;
+    --accent: var(--rose);
+    --accent-doux: rgba(244, 145, 178, .16);
+    --fond: #1b1640;
+    --texte: #fdeef3;
+    --texte-2: rgba(235, 220, 245, .62);
+    --separateur: rgba(200, 190, 255, .16);
+    --carte: rgba(60, 52, 137, .5);
+    --champ: #2c2668;
+    --verre: rgba(45, 38, 110, .5);
+    --reflet: rgba(255, 255, 255, .2);
+    --bord-verre: rgba(200, 190, 255, .18);
+    --ombre: 0 10px 36px rgba(0, 0, 0, .45);
+    --tache-1: rgba(90, 70, 200, .6);
+    --tache-2: rgba(160, 50, 110, .45);
+    --tache-3: rgba(40, 30, 110, .7);
+    --astre: #f6b8cd;
+    --vague-1: rgba(80, 66, 170, .55);
+    --vague-2: rgba(27, 22, 64, .95);
+  }
+}
+
+* { box-sizing: border-box; }
+html {
+  -webkit-text-size-adjust: 100%; background: var(--fond); min-height: 100%;
+  touch-action: pan-x pan-y;      /* on peut faire défiler, mais pas zoomer */
+}
+body { min-height: 100vh; min-height: 100lvh; }
+button, input, select, textarea, label { touch-action: manipulation; }
+
+body {
+  margin: 0;
+  background: transparent;   /* transparent : sinon il cacherait le fond coloré */
+  color: var(--texte);
+  font-family: var(--police);
+  font-size: 17px;
+  line-height: 1.35;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- Le fond ----------
+   Des dégradés radiaux plutôt que filter: blur() : l'iPhone abandonne
+   parfois les gros flous, alors que les dégradés s'affichent toujours.
+   z-index: 0 (et pas -1) : sinon, sur iPhone, l'écran peut devenir noir. */
+.fond-couleurs {
+  position: fixed; left: 0; right: 0; top: -20vh; bottom: -20vh; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(60vmax 60vmax at 10% 5%, var(--tache-1), transparent 60%),
+    radial-gradient(55vmax 55vmax at 105% 45%, var(--tache-2), transparent 60%),
+    radial-gradient(65vmax 65vmax at 25% 105%, var(--tache-3), transparent 60%);
+}
+/* Les étoiles : seulement la nuit */
+.etoiles { display: none; }
+@media (prefers-color-scheme: dark) {
+  .etoiles {
+    display: block; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      radial-gradient(1.4px 1.4px at 12% 8%, #fff, transparent),
+      radial-gradient(1px 1px at 30% 18%, #fff, transparent),
+      radial-gradient(1.6px 1.6px at 55% 6%, #fff, transparent),
+      radial-gradient(1px 1px at 72% 22%, #fff, transparent),
+      radial-gradient(1.3px 1.3px at 88% 10%, #fff, transparent),
+      radial-gradient(1px 1px at 20% 40%, #fff, transparent),
+      radial-gradient(1.2px 1.2px at 80% 48%, #fff, transparent),
+      radial-gradient(1px 1px at 45% 62%, #fff, transparent),
+      radial-gradient(1.3px 1.3px at 8% 75%, #fff, transparent),
+      radial-gradient(1px 1px at 66% 82%, #fff, transparent),
+      radial-gradient(1.4px 1.4px at 92% 70%, #fff, transparent);
+    opacity: .75;
+    animation: scintille 4s ease-in-out infinite alternate;
+  }
+}
+@keyframes scintille { to { opacity: .4; } }
+
+/* ---------- L'horizon (soleil ou lune sur la mer) ---------- */
+.horizon { position: absolute; left: -16px; right: -16px; top: calc(var(--haut) - 10px); height: 140px; z-index: -1; pointer-events: none; }
+.horizon svg { width: 100%; height: 100%; stroke: none; }
+.horizon .soleil { fill: var(--astre); animation: respire 6s ease-in-out infinite alternate; transform-origin: 300px 78px; }
+.horizon .lune { fill: var(--astre); display: none; }
+.horizon .v1 { fill: var(--vague-1); }
+.horizon .v2 { fill: var(--vague-2); }
+@media (prefers-color-scheme: dark) {
+  .horizon .soleil { display: none; }
+  .horizon .lune { display: block; }
+}
+@keyframes respire { to { transform: scale(1.06); } }
+
+/* ---------- Les surfaces en verre ---------- */
+.verre, .verre-fort {
+  position: relative;
+  background: var(--verre);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+  border: 0.5px solid var(--bord-verre);
+  box-shadow: inset 0 1px 0 var(--reflet), var(--ombre);
+}
+/* Le verre « liquide » de la barre du bas : une goutte de verre posée sur l'écran */
+.verre-fort {
+  background: linear-gradient(160deg, rgba(255,255,255,.6) 0%, rgba(255,240,245,.22) 45%, rgba(255,255,255,.36) 100%);
+  -webkit-backdrop-filter: blur(12px) saturate(210%);
+  backdrop-filter: blur(12px) saturate(210%);
+  border: 1px solid rgba(255,255,255,.75);
+  box-shadow:
+    inset 0 1.5px 1px rgba(255,255,255,.95),
+    inset 0 -1.5px 2px rgba(255,255,255,.35),
+    inset 0 0 18px rgba(255,255,255,.28),
+    0 14px 34px rgba(170,70,90,.18),
+    0 2px 6px rgba(170,70,90,.06);
+}
+@media (prefers-color-scheme: dark) {
+  .verre-fort {
+    background: linear-gradient(160deg, rgba(200,190,255,.22) 0%, rgba(120,100,220,.1) 45%, rgba(200,190,255,.16) 100%);
+    border-color: rgba(220,210,255,.25);
+    box-shadow:
+      inset 0 1.5px 1px rgba(255,255,255,.3),
+      inset 0 0 18px rgba(255,255,255,.06),
+      0 14px 34px rgba(0,0,0,.5);
+  }
+}
+
+/* ---------- Barre du haut ---------- */
+.barre-haut {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+  height: calc(var(--haut) + 44px); padding-top: var(--haut);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 17px;
+  transition: background .25s, box-shadow .25s;
+}
+.barre-haut span { opacity: 0; transition: opacity .2s; }
+.barre-haut.defile {
+  background: var(--verre);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: 0 0.5px 0 var(--separateur);
+}
+.barre-haut.defile span { opacity: 1; }
+
+main { position: relative; z-index: 1; padding: calc(var(--haut) + 44px) 16px calc(var(--bas) + 130px); max-width: 640px; margin: 0 auto; isolation: isolate; }
+
+/* Le titre prend toute la largeur ; les boutons + et … flottent en haut à droite */
+.grand-titre { position: relative; padding: 6px 4px 14px; }
+.grand-titre .surtitre { padding-right: 100px; min-height: 19px; }
+.grand-titre h1 { margin: 0; font-size: 34px; font-weight: 700; letter-spacing: .2px; line-height: 1.1; }
+.surtitre { margin: 0 0 2px; font-size: 14px; font-weight: 600; color: var(--texte-2); }
+.actions-haut { position: absolute; top: -8px; right: 4px; display: flex; gap: 8px; }
+.btn-rond-verre { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; padding: 0; color: var(--accent); }
+.btn-rond-verre svg { width: 21px; height: 21px; stroke-width: 2.2; }
+.btn-rond-verre[hidden] { display: none; }
+
+h2 { font-size: 20px; font-weight: 700; margin: 26px 4px 10px; }
+h2 .compte { font-size: 15px; color: var(--texte-2); font-weight: 600; margin-left: 4px; }
+
+.vue { display: none; }
+.vue.active { display: block; animation: apparait .3s cubic-bezier(.2,.8,.2,1); }
+@keyframes apparait { from { opacity: 0; transform: translateY(8px); } }
+
+/* ---------- Les cartes (formes bien rondes) ---------- */
+.carte {
+  border-radius: 28px; padding: 16px 18px; margin-bottom: 12px; overflow: hidden;
+  /* le reflet de lumière en haut à gauche, posé SOUS le texte */
+  background: radial-gradient(120% 80% at 0% 0%, var(--lumiere-carte), transparent 55%), var(--carte);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  backdrop-filter: blur(24px) saturate(170%);
+  border: 0.5px solid var(--bord-verre);
+  box-shadow: inset 0 1px 0 var(--reflet), var(--ombre);
+  position: relative;
+}
+:root { --lumiere-carte: rgba(255,255,255,.45); }
+@media (prefers-color-scheme: dark) { :root { --lumiere-carte: rgba(255,255,255,.07); } }
+button.carte { display: block; width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.carte .etiquette { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--accent); }
+.carte .grand { font-size: 21px; font-weight: 700; margin: 6px 0 2px; line-height: 1.2; overflow-wrap: anywhere; }
+.carte .muted, .muted { color: var(--texte-2); font-size: 14px; margin: 2px 0 0; }
+.carte .fleche { position: absolute; right: 16px; top: 16px; color: var(--texte-2); font-size: 20px; }
+
+/* ---------- Boutons en forme de pilule ---------- */
+.btn-principal, .btn-secondaire, .btn-doux {
+  border: none; border-radius: 999px; padding: 13px 18px; font: inherit; font-weight: 700; font-size: 16px; cursor: pointer;
+  transition: transform .15s, filter .15s;
+}
+.btn-principal { background: linear-gradient(135deg, var(--rose), var(--corail)); color: #fff; box-shadow: 0 6px 18px rgba(224,86,122,.32), inset 0 1px 0 rgba(255,255,255,.35); }
+.btn-secondaire { background: rgba(140,90,120,.14); color: var(--texte); }
+.btn-doux { background: var(--accent-doux); color: var(--accent); }
+.btn-petit { padding: 9px 14px; font-size: 14px; }
+.boutons { display: flex; gap: 10px; margin-top: 14px; }
+.boutons > * { flex: 1; }
+button:active { transform: scale(.96); }
+
+/* ---------- Interrupteur (segment) ---------- */
+.segment { display: flex; padding: 3px; border-radius: 999px; background: rgba(140,90,120,.14); margin: 0 0 12px; }
+.segment button {
+  flex: 1; border: none; background: none; font: inherit; font-size: 14px; font-weight: 600; color: var(--texte);
+  padding: 8px 6px; border-radius: 999px; cursor: pointer; transition: background .2s;
+}
+.segment button.active { background: var(--champ); box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+.segment .bulle { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 4px; border-radius: 9px; background: var(--rose); color: #fff; font-size: 11px; }
+
+/* ---------- Puces de filtre ---------- */
+.filtres { display: flex; gap: 8px; overflow-x: auto; margin: 0 -16px 12px; padding: 2px 16px 6px; scrollbar-width: none; }
+.filtres::-webkit-scrollbar { display: none; }
+.filtres button {
+  border: 0.5px solid var(--bord-verre); background: var(--verre); color: var(--texte);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  border-radius: 999px; padding: 7px 14px; font: inherit; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer;
+}
+.filtres button.active { background: var(--accent); color: #fff; border-color: transparent; }
+
+/* ---------- Envies ---------- */
+.envie .haut { display: flex; gap: 12px; align-items: flex-start; }
+.envie .emoji { font-size: 30px; line-height: 1; flex: none; margin-top: 2px; }
+.envie .titre { font-size: 18px; font-weight: 700; overflow-wrap: anywhere; }
+.envie .detail { font-size: 14px; color: var(--texte-2); margin-top: 3px; overflow-wrap: anywhere; }
+.avis { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.avis span { font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: rgba(140,90,120,.12); color: var(--texte-2); }
+.avis span.oui { background: rgba(63,185,138,.16); color: var(--menthe); }
+.avis span.non { background: rgba(140,90,120,.12); text-decoration: line-through; }
+.souvenir { margin-top: 10px; padding: 10px 12px; border-radius: 18px; background: var(--accent-doux); font-size: 14px; overflow-wrap: anywhere; }
+.de { text-align: center; }
+.de .face { font-size: 44px; display: inline-block; }
+.de.roule .face { animation: roule .7s cubic-bezier(.3,1.5,.5,1); }
+@keyframes roule { from { transform: rotate(-540deg) scale(.4); } }
+
+details.replie { margin-top: 18px; }
+details.replie summary { color: var(--accent); cursor: pointer; padding: 4px; list-style: none; font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+details.replie summary::-webkit-details-marker { display: none; }
+
+.vide { text-align: center; color: var(--texte-2); padding: 26px 14px; font-size: 15px; }
+.vide .grand-emoji { display: block; font-size: 42px; margin-bottom: 8px; }
+
+/* ---------- Petits mots ---------- */
+.mots-rapides { display: flex; gap: 8px; overflow-x: auto; margin: 0 -16px 14px; padding: 2px 16px 6px; scrollbar-width: none; }
+.mots-rapides::-webkit-scrollbar { display: none; }
+.mots-rapides button {
+  flex: none; border: none; border-radius: 999px; padding: 9px 14px; font: inherit; font-size: 14px; font-weight: 600;
+  background: var(--carte); color: var(--texte); box-shadow: inset 0 1px 0 var(--reflet), 0 3px 10px rgba(170,70,90,.08); cursor: pointer;
+}
+.fil { display: flex; flex-direction: column; gap: 10px; }
+.bulle-mot { max-width: 82%; padding: 11px 15px 9px; border-radius: 24px; font-size: 16px; overflow-wrap: anywhere; white-space: pre-wrap; position: relative; }
+.bulle-mot .quand { display: block; font-size: 11.5px; margin-top: 4px; opacity: .7; white-space: normal; }
+.bulle-mot.de-moi { align-self: flex-end; background: linear-gradient(135deg, var(--rose), var(--corail)); color: #fff; border-bottom-right-radius: 8px; }
+.bulle-mot.de-lautre { align-self: flex-start; background: var(--carte); border-bottom-left-radius: 8px; box-shadow: inset 0 1px 0 var(--reflet), 0 3px 12px rgba(170,70,90,.08); }
+.bulle-mot.lettre { border: 1.5px dashed currentColor; }
+.bulle-mot.de-moi.lettre { border-color: rgba(255,255,255,.7); }
+.enveloppe { display: flex; gap: 14px; align-items: center; }
+button.carte.enveloppe { display: flex; }
+.enveloppe .icone { font-size: 38px; line-height: 1; }
+.coeur-titre { color: var(--rose); display: inline-block; animation: battement 1.8s ease-in-out infinite; }
+.enveloppe.prete .icone { animation: sautille 1.6s ease-in-out infinite; }
+@keyframes sautille { 50% { transform: translateY(-5px) rotate(-6deg); } }
+.lettre-ouverte { padding: 22px 20px; border-radius: 24px; background: var(--champ); font-size: 17px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; animation: deplie .6s cubic-bezier(.2,.9,.3,1.2); }
+.lettre-ouverte .signature { display: block; text-align: right; margin-top: 14px; font-weight: 700; color: var(--accent); }
+@keyframes deplie { from { transform: scale(.6) rotate(-4deg); opacity: 0; } }
+
+/* ---------- Nos dates (une frise) ---------- */
+.frise { position: relative; padding-left: 26px; }
+.frise::before { content: ""; position: absolute; left: 10px; top: 14px; bottom: 14px; width: 2px; border-radius: 2px; background: linear-gradient(var(--lilas), var(--rose), var(--corail)); opacity: .6; }
+.frise .carte { cursor: pointer; }
+.frise .carte::after { content: "♥"; position: absolute; left: -23px; top: 18px; color: var(--rose); font-size: 14px; }
+.frise .carte { overflow: visible; }
+.date-ligne { display: flex; gap: 12px; align-items: center; }
+.date-ligne .emoji { font-size: 28px; flex: none; }
+.date-ligne .titre { font-weight: 700; font-size: 17px; overflow-wrap: anywhere; }
+
+/* ---------- Mon coin ---------- */
+.secret { display: flex; gap: 10px; align-items: center; padding: 12px 16px; border-radius: 22px; background: var(--accent-doux); color: var(--accent); font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+.liste-coin { list-style: none; margin: 0; padding: 4px 0; }
+.liste-coin li { display: flex; align-items: center; gap: 12px; padding: 11px 2px; position: relative; }
+.liste-coin li + li { border-top: 0.5px solid var(--separateur); }
+.liste-coin .infos { flex: 1; min-width: 0; cursor: pointer; }
+.liste-coin .t { font-size: 16px; overflow-wrap: anywhere; }
+.liste-coin li.fait .t { color: var(--texte-2); text-decoration: line-through; }
+.case {
+  width: 26px; height: 26px; flex: none; border-radius: 50%; padding: 0; cursor: pointer;
+  border: 1.8px solid rgba(160,100,130,.45); background: none; display: grid; place-items: center; font-size: 14px; color: #fff;
+}
+.case.cochee { border-color: var(--rose); background: var(--rose); }
+
+/* ---------- Dock : barre d'onglets flottante ---------- */
+.dock {
+  position: fixed; left: 0; right: 0; bottom: calc(var(--bas) + 12px); z-index: 20;
+  display: flex; justify-content: center; padding: 0 12px; pointer-events: none;
+}
+.dock > * { pointer-events: auto; }
+/* 5 onglets : leur largeur s'adapte à l'écran (393 px sur l'iPhone 15) */
+.onglets { display: flex; border-radius: 999px; padding: 4px; position: relative;
+  --l-onglet: min(78px, calc((100vw - 24px - 8px) / 5));
+  touch-action: none; -webkit-user-select: none; user-select: none; }
+.onglets button {
+  position: relative; z-index: 1;
+  border: none; background: none; color: var(--texte); font: inherit; cursor: pointer;
+  width: var(--l-onglet); padding: 6px 0 5px; border-radius: 999px;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  font-size: 10px; font-weight: 700; white-space: nowrap;
+  transition: color .25s;
+}
+.onglets button svg { width: 25px; height: 25px; }
+.onglets button.active { color: var(--accent); }
+.onglets button.active svg { animation: battement .5s ease; }
+@keyframes battement { 40% { transform: scale(1.18); } }
+/* La pilule qui glisse sous l'onglet actif */
+.pilule {
+  position: absolute; top: 4px; bottom: 4px; left: 0; width: var(--l-onglet); border-radius: 999px;
+  background: var(--accent-doux);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4);
+  transition: transform .45s cubic-bezier(.3,1.4,.5,1), background .2s, box-shadow .2s;
+}
+.onglets.glisse .pilule {
+  transition: transform .08s linear, background .2s, box-shadow .2s;
+  background: rgba(255,255,255,.4);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.9), inset 0 0 10px rgba(255,255,255,.4), 0 6px 18px rgba(170,70,90,.18);
+}
+@media (prefers-color-scheme: dark) {
+  .onglets.glisse .pilule { background: rgba(255,255,255,.16); box-shadow: inset 0 1px 1px rgba(255,255,255,.35), 0 6px 18px rgba(0,0,0,.4); }
+}
+.onglets.glisse button.active { color: var(--texte); }
+.onglets.glisse button.survol { color: var(--accent); }
+
+/* ---------- Feuille (sheet) qui monte du bas ---------- */
+dialog.feuille {
+  margin: auto auto 0; width: 100%; max-width: 560px; max-height: 92vh;
+  border: none; padding: 0; border-radius: 34px 34px 0 0;
+  background: var(--fond); color: var(--texte);
+  box-shadow: 0 -10px 40px rgba(120,40,70,.18);
+}
+dialog.feuille[open] { animation: monte .42s cubic-bezier(.2,.9,.25,1); }
+@keyframes monte { from { transform: translateY(100%); } }
+dialog::backdrop { background: rgba(60,20,40,.28); animation: fondu .3s; }
+@keyframes fondu { from { opacity: 0; } }
+
+dialog form { padding: 8px 16px calc(var(--bas) + 24px); display: flex; flex-direction: column; gap: 18px; }
+.poignee { width: 36px; height: 5px; border-radius: 3px; background: rgba(140,90,120,.35); margin: 0 auto; }
+.entete-feuille { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; margin: -6px 0 -4px; }
+.entete-feuille strong { font-size: 17px; text-align: center; }
+.entete-feuille > :first-child { justify-self: start; }
+.entete-feuille > :last-child { justify-self: end; }
+.btn-texte { border: none; background: none; color: var(--accent); font: inherit; font-size: 17px; padding: 8px 4px; cursor: pointer; }
+.btn-texte.fort { font-weight: 700; }
+.btn-texte.danger { color: #e5484d; }
+.contenu-feuille { display: flex; flex-direction: column; gap: 16px; }
+
+/* Les champs de saisie, groupés comme dans Réglages */
+.groupe { background: var(--champ); border-radius: 20px; overflow: hidden; }
+.groupe label, .groupe .ligne { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; font-size: 16px; }
+.groupe > * + * { border-top: 0.5px solid var(--separateur); }
+.groupe input, .groupe textarea, .groupe select {
+  font: inherit; font-size: 17px; color: var(--texte); background: none; border: none; outline: none; min-width: 0;
+}
+.groupe input[type="text"], .groupe textarea { width: 100%; padding: 13px 16px; display: block; }
+.groupe textarea { min-height: 120px; resize: none; line-height: 1.45; }
+.groupe select, .groupe input[type="date"] { text-align: right; color: var(--accent); }
+.aide { font-size: 13px; color: var(--texte-2); margin: -8px 6px 0; }
+.choix-emoji { display: flex; flex-wrap: wrap; gap: 6px; }
+.choix-emoji label { cursor: pointer; }
+.choix-emoji input { display: none; }
+.choix-emoji span { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; font-size: 22px; background: var(--champ); transition: transform .15s; }
+.choix-emoji input:checked + span { background: var(--accent-doux); box-shadow: 0 0 0 2px var(--accent); transform: scale(1.08); }
+/* Interrupteur iOS */
+.interrupteur { appearance: none; -webkit-appearance: none; width: 51px; height: 31px; border-radius: 16px; background: rgba(140,90,120,.25); position: relative; transition: background .2s; flex: none; cursor: pointer; }
+.interrupteur::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,.2); transition: transform .25s; }
+.interrupteur:checked { background: var(--menthe); }
+.interrupteur:checked::after { transform: translateX(20px); }
+
+/* ---------- Petit message (toast) ---------- */
+.toast {
+  position: fixed; left: 50%; top: calc(var(--haut) + 10px); z-index: 50; transform: translateX(-50%);
+  padding: 10px 18px; border-radius: 999px; font-size: 15px; font-weight: 700; white-space: nowrap;
+  animation: toast 2.2s ease forwards;
+}
+@keyframes toast { 0% { opacity: 0; transform: translate(-50%, -16px); } 12%, 85% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -10px); } }
+
+/* ---------- La pluie de cœurs ---------- */
+#coeurs span, dialog > span {
+  position: fixed; bottom: -50px; z-index: 60; pointer-events: none;
+  animation: envol 2.6s cubic-bezier(.25,.6,.4,1) forwards;
+}
+@keyframes envol {
+  60% { opacity: 1; }
+  to { transform: translate(var(--derive, 0), -105vh) rotate(var(--tourne, 15deg)); opacity: 0; }
+}
+
+/* Mode essai : petite pastille dans les réglages */
+.pastille-essai { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--accent-doux); color: var(--accent); }
+
+/* Moins d'animations si l'iPhone le demande (Réglages › Accessibilité) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
