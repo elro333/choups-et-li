@@ -211,21 +211,16 @@ function petitMessage(texte) {
   petitMessage.minuteur = setTimeout(() => (t.hidden = true), 2300);
 }
 
-// ---------- 6. Réglages (mode essai) ----------
+// ---------- 6. Réglages ----------
+// Volontairement, on ne peut PAS changer de personne ici : sinon il suffirait
+// de « devenir l'autre » pour lire son coin secret.
 $("#btn-reglages").addEventListener("click", () => {
-  const options = Donnees.personnes().map((p) =>
-    `<button type="button" data-qui="${p}" class="${p === moi() ? "active" : ""}">${surnom(p)}</button>`).join("");
   const cycle = Donnees.profil(moi()).cycle || { actif: false, duree: 28, regles: 5 };
   ouvrirFeuille({
     titre: "Réglages",
     valider: "OK",
     html: `
-      <p class="muted"><span class="pastille-essai">Mode essai</span> Tout reste sur cet appareil, rien n'est envoyé. Les exemples sont inventés.</p>
-      <div>
-        <p class="surtitre" style="margin:0 6px 8px">Je suis…</p>
-        <div class="segment" id="choix-moi">${options}</div>
-        <p class="aide" style="margin-top:0">Pour tester les deux côtés de l'appli. Plus tard, chacun sera connecté avec son compte.</p>
-      </div>
+      <p class="muted"><span class="pastille-essai">Mode essai</span> Tout reste sur cet appareil, rien n'est envoyé. Tu es ${surnom(moi())} sur ce téléphone.</p>
       <div class="groupe">
         <label>Son surnom à elle <input type="text" name="surnom-choups" value="${surnom("choups")}" style="text-align:right;width:55%;padding:0"></label>
         <label>Son surnom à lui <input type="text" name="surnom-li" value="${surnom("li")}" style="text-align:right;width:55%;padding:0"></label>
@@ -250,13 +245,6 @@ $("#btn-reglages").addEventListener("click", () => {
       } });
     },
   });
-  formFeuille.querySelectorAll("#choix-moi button").forEach((b) =>
-    b.addEventListener("click", () => {
-      Donnees.changerMoi(b.dataset.qui);
-      formFeuille.querySelectorAll("#choix-moi button").forEach((x) => x.classList.toggle("active", x === b));
-      petitMessage(`Tu es maintenant ${Donnees.surnom(b.dataset.qui)}`);
-    })
-  );
   $("#btn-remettre").addEventListener("click", () => {
     Donnees.remettreExemples();
     fermerFeuille();
@@ -294,15 +282,15 @@ window.addEventListener("DOMContentLoaded", () => {
   // Qui tient ce téléphone ?
   // - le lien « …/choups-et-li/?moi=li » le dit directement ;
   // - sinon, au tout premier lancement, l'appli pose la question une fois.
+  // Une fois choisi, c'est définitif sur ce téléphone (le lien ne change plus rien).
   // (Avec Supabase, ce sera le compte connecté qui le dira.)
   const demande = new URLSearchParams(location.search).get("moi");
-  if (Donnees.personnes().includes(demande)) {
-    Donnees.changerMoi(demande);
-    history.replaceState(null, "", location.pathname); // on retire « ?moi=… » de l'adresse
-  }
+  if (Donnees.personnes().includes(demande) && !Donnees.moiChoisi()) Donnees.changerMoi(demande);
+  if (demande) history.replaceState(null, "", location.pathname); // on retire « ?moi=… » de l'adresse
   afficher();
   requestAnimationFrame(placerPilule);
-  if (!Donnees.moiChoisi()) setTimeout(demanderQui, 400);
+  // D'abord le code (verrou.js), ensuite seulement la question « c'est qui ? »
+  Verrou.demarrer(() => { if (!Donnees.moiChoisi()) setTimeout(demanderQui, 300); });
 });
 
 function demanderQui() {
@@ -312,7 +300,7 @@ function demanderQui() {
       <p style="text-align:center;font-size:44px;margin:0">💗</p>
       <p class="grand" style="text-align:center;margin:0">C'est qui sur ce téléphone ?</p>
       ${Donnees.personnes().map((p) => `<button type="button" class="btn-principal" data-je-suis="${p}">Je suis ${surnom(p)}</button>`).join("")}
-      <p class="aide" style="text-align:center;margin:0">On ne le demande qu'une fois. Ça se change dans … › Réglages.</p>`,
+      <p class="aide" style="text-align:center;margin:0">On ne le demande qu'une fois : ensuite, c'est pour de bon sur ce téléphone.</p>`,
   });
   formFeuille.querySelectorAll("[data-je-suis]").forEach((b) => b.addEventListener("click", () => {
     Donnees.changerMoi(b.dataset.jeSuis);
