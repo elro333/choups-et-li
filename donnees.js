@@ -176,6 +176,10 @@ const Donnees = (() => {
         const r = await client.from("lettres").insert({ id: o.id, de: o.de, ouvrir_le: o.ouvrirLe, texte: o.texte });
         if (r.error) erreur(r.error);
       }
+      // Prévenir l'autre par une notification : un mot, ou une envie que je propose
+      if (table === "mots" || (table === "envies" && o.par === monQui)) {
+        client.functions.invoke("notifier", { body: { id: o.id } }).catch(() => {});
+      }
       return o;
     },
     async modifier(table, id, champs) {
@@ -200,6 +204,14 @@ const Donnees = (() => {
       const { data } = await client.from("lettres").select("texte").eq("id", id).maybeSingle();
       if (data) textes[id] = data.texte;
       return data?.texte || null;
+    },
+
+    // Notifications : on range l'« adresse » de ce téléphone dans la base
+    async enregistrerAbonnement(abonnement) {
+      const { error } = await client.from("abonnements_push")
+        .upsert({ endpoint: abonnement.endpoint, qui: monQui, abonnement }, { onConflict: "endpoint" });
+      if (error) { erreur(error); return false; }
+      return true;
     },
 
     surChangement(fn) { ecouteurs.push(fn); },

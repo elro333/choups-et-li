@@ -223,6 +223,9 @@ $("#btn-reglages").addEventListener("click", () => {
       <p class="muted" style="text-align:center">Connecté·e en tant que <b>${surnom(moi())}</b> 💗</p>
       <div class="groupe">
         <label>Mon surnom <input type="text" name="surnom" value="${surnom(moi())}" maxlength="20" style="text-align:right;width:55%;padding:0"></label>
+        <div class="ligne"><span>🔔 Notifications</span>${Notifs.etat() === "active"
+          ? `<span class="muted" style="margin:0">Activées ✓</span>`
+          : `<button type="button" class="btn-texte fort" id="btn-notifs">Activer</button>`}</div>
       </div>
       <div>
         <p class="surtitre" style="margin:0 6px 8px">🌸 Mon cycle</p>
@@ -245,6 +248,7 @@ $("#btn-reglages").addEventListener("click", () => {
       });
     },
   });
+  $("#btn-notifs")?.addEventListener("click", async () => { if (await Notifs.activer()) fermerFeuille(); });
   $("#btn-deconnexion").addEventListener("click", () => {
     if (confirm("Se déconnecter de Choups & Li sur ce téléphone ?")) Donnees.deconnecter();
   });
@@ -286,6 +290,7 @@ window.addEventListener("DOMContentLoaded", () => {
     try {
       if (!(await Donnees.session())) await Connexion.demander();
       if (!(await Donnees.demarrer())) Connexion.pasRelie();
+      else Notifs.rafraichir();
     } catch (e) {
       console.error(e);
       petitMessage("Pas de connexion pour l'instant 😕");

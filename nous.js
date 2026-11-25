@@ -40,6 +40,7 @@ async function afficherNous(ecran) {
   // 2. L'humeur du jour (humeur.js) et le cycle, s'il est partagé (cycle.js)
   html += carteHumeur(humeurs);
   html += carteCycle(cycle);
+  html += Notifs.carte(); // « Activer les notifications », tant que ce n'est pas fait (notifications.js)
 
   // 3. Le dernier petit mot reçu
   const recus = mots
@@ -113,6 +114,7 @@ async function afficherNous(ecran) {
 
   brancherHumeur(ecran, humeurs);
   brancherCycle(ecran, cycle);
+  Notifs.brancher(ecran);
   ecran.querySelector("[data-lettre]")?.addEventListener("click", (e) => ouvrirLettre(e.currentTarget.dataset.lettre));
   $("#btn-bisou").addEventListener("click", () => envoyerMot("😘"));
   $("#btn-de")?.addEventListener("click", () => {
